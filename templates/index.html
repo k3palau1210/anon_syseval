@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マスキング評価システム - SLM ベンチマーク</title>
+    <meta name="description" content="コールセンター音声認識データのマスキングに最適なSLMを選定するベンチマーク評価システム">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- サイドバー -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <rect width="28" height="28" rx="6" fill="#2563EB" />
+                        <path d="M7 14h14M14 7v14" stroke="white" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
+                    <div class="logo-text">
+                        <span class="logo-title">マスキング評価</span>
+                        <span class="logo-subtitle">SLM Benchmark</span>
+                    </div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                        <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                        <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                        <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                    <span>ダッシュボード</span>
+                </a>
+                <a href="#" class="nav-item" data-page="services" id="nav-services">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5" />
+                        <path
+                            d="M10 2v2M10 16v2M2 10h2M16 10h2M4.93 4.93l1.41 1.41M13.66 13.66l1.41 1.41M4.93 15.07l1.41-1.41M13.66 6.34l1.41-1.41"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                    </svg>
+                    <span>SLMサービス</span>
+                </a>
+                <a href="#" class="nav-item" data-page="rules" id="nav-rules">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M3 5h14M3 10h10M3 15h6" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" />
+                    </svg>
+                    <span>マスキングルール</span>
+                </a>
+                <a href="#" class="nav-item" data-page="data" id="nav-data">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M4 4h12v12H4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                        <path d="M4 8h12M8 8v8" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                    <span>テストデータ</span>
+                </a>
+                <a href="#" class="nav-item" data-page="benchmark" id="nav-benchmark">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M3 17V9l4-2v10M9 17V5l4-3v15M15 17v-7l3-2v9" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span>ベンチマーク</span>
+                </a>
+                <a href="#" class="nav-item" data-page="results" id="nav-results">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                    <span>結果比較</span>
+                </a>
+                <a href="#" class="nav-item" data-page="detail" id="nav-detail">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="2" y="3" width="7" height="14" rx="1" stroke="currentColor" stroke-width="1.5" />
+                        <rect x="11" y="3" width="7" height="14" rx="1" stroke="currentColor" stroke-width="1.5" />
+                        <path d="M5 7h1M5 10h1M5 13h1M14 7h1M14 10h1M14 13h1" stroke="currentColor" stroke-width="1.5"
+                            stroke-linecap="round" />
+                    </svg>
+                    <span>詳細比較</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="server-status" id="server-status">
+                    <span class="status-dot running"></span>
+                    <span class="status-text">サーバー稼働中</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- メインコンテンツ -->
+        <main class="main-content">
+            <!-- ダッシュボード -->
+            <div class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h1>ダッシュボード</h1>
+                    <p class="page-desc">システム全体の概要とステータス</p>
+                </div>
+                <div class="stats-grid" id="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+                                <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="stat-services">0</span><span
+                                class="stat-label">SLMサービス</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="stat-running">0</span><span
+                                class="stat-label">稼働中</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"
+                                    stroke-width="2" />
+                                <path d="M3 9h18M9 9v12" stroke="currentColor" stroke-width="2" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="stat-testdata">0</span><span
+                                class="stat-label">テストデータ</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 20V10l5-2v12M10 20V6l5-4v18M17 20V12l5-2v10" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="stat-benchmarks">0</span><span
+                                class="stat-label">ベンチマーク</span></div>
+                    </div>
+                </div>
+
+                <div class="content-grid">
+                    <div class="card" id="dashboard-services-card">
+                        <div class="card-header">
+                            <h2>SLMサービスステータス</h2>
+                            <button class="btn btn-sm btn-ghost" onclick="navigateTo('services')">すべて表示</button>
+                        </div>
+                        <div class="card-body" id="dashboard-services-list">
+                            <div class="empty-state small">サービスが登録されていません</div>
+                        </div>
+                    </div>
+                    <div class="card" id="dashboard-recent-card">
+                        <div class="card-header">
+                            <h2>最近のベンチマーク</h2>
+                            <button class="btn btn-sm btn-ghost" onclick="navigateTo('results')">すべて表示</button>
+                        </div>
+                        <div class="card-body" id="dashboard-recent-list">
+                            <div class="empty-state small">ベンチマーク結果がありません</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLMサービス管理 -->
+            <div class="page" id="page-services">
+                <div class="page-header">
+                    <h1>SLMサービス管理</h1>
+                    <button class="btn btn-primary" id="btn-add-service">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        サービス追加
+                    </button>
+                </div>
+                <div class="services-grid" id="services-list">
+                    <div class="empty-state">SLMサービスが登録されていません</div>
+                </div>
+            </div>
+
+            <!-- マスキングルール -->
+            <div class="page" id="page-rules">
+                <div class="page-header">
+                    <h1>マスキングルール</h1>
+                    <button class="btn btn-primary" id="btn-add-rule">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        ルール追加
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <table class="data-table" id="rules-table">
+                            <thead>
+                                <tr>
+                                    <th>有効</th>
+                                    <th>カテゴリ</th>
+                                    <th>パターン</th>
+                                    <th>説明</th>
+                                    <th>優先度</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rules-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- テストデータ -->
+            <div class="page" id="page-data">
+                <div class="page-header">
+                    <h1>テストデータ</h1>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" id="btn-upload-file">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 10V2M4 6l4-4 4 4" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M2 12v2h12v-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            ファイル取込
+                        </button>
+                        <button class="btn btn-secondary" id="btn-import-folder">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4v9h12V6H8L6 4H2z" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            フォルダ取込
+                        </button>
+                        <button class="btn btn-secondary" id="btn-import-data">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2v8M4 6l4 4 4-4M2 12v2h12v-2" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            JSON入力
+                        </button>
+                        <button class="btn btn-primary" id="btn-add-data">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg>
+                            データ追加
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 統計カード -->
+                <div class="stats-grid" id="data-stats-grid" style="margin-bottom:20px">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor"
+                                    stroke-width="2" />
+                                <path d="M3 9h18M9 9v12" stroke="currentColor" stroke-width="2" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="data-stat-total">0</span><span
+                                class="stat-label">総データ数</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 7h16M4 12h10M4 17h6" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="data-stat-avglen">0</span><span
+                                class="stat-label">平均文字数</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="data-stat-expected">0</span><span
+                                class="stat-label">期待結果あり</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" />
+                            </svg></div>
+                        <div class="stat-info"><span class="stat-value" id="data-stat-totalchars">0</span><span
+                                class="stat-label">総文字数</span></div>
+                    </div>
+                </div>
+
+                <!-- 文字数分布チャート -->
+                <div class="card" id="data-dist-card" style="margin-bottom:20px;display:none">
+                    <div class="card-header">
+                        <h2>文字数分布</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="data-distribution-chart" class="chart-area"></div>
+                    </div>
+                </div>
+
+                <!-- データテーブル -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>データ一覧</h2>
+                        <button class="btn btn-sm btn-danger" id="btn-delete-all-data"
+                            style="display:none">全データ削除</button>
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table" id="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px"><input type="checkbox" id="data-select-all"></th>
+                                    <th>タイトル</th>
+                                    <th>テキスト（プレビュー）</th>
+                                    <th>文字数</th>
+                                    <th>期待結果</th>
+                                    <th>登録日</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 隠しファイル入力 -->
+                <input type="file" id="file-upload-input" accept=".json,.csv,.txt" multiple style="display:none">
+            </div>
+
+            <!-- ベンチマーク実行 -->
+            <div class="page" id="page-benchmark">
+                <div class="page-header">
+                    <h1>ベンチマーク実行</h1>
+                </div>
+                <div class="benchmark-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>実行設定</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>ベンチマーク名</label>
+                                <input type="text" id="benchmark-name" class="form-input" placeholder="例: SLM比較テスト v1">
+                            </div>
+                            <div class="form-group">
+                                <label>説明（オプション）</label>
+                                <textarea id="benchmark-desc" class="form-input" rows="2"
+                                    placeholder="実行内容のメモ"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>SLMサービス</label>
+                                <div id="benchmark-slm-list" class="checkbox-list"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>テストデータ</label>
+                                <div class="checkbox-list-controls">
+                                    <button class="btn btn-xs btn-ghost"
+                                        onclick="toggleAllCheckboxes('benchmark-data-list', true)">全選択</button>
+                                    <button class="btn btn-xs btn-ghost"
+                                        onclick="toggleAllCheckboxes('benchmark-data-list', false)">全解除</button>
+                                </div>
+                                <div id="benchmark-data-list" class="checkbox-list"></div>
+                            </div>
+                            <button class="btn btn-primary btn-lg btn-full" id="btn-run-benchmark">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <polygon points="5,3 17,10 5,17" fill="currentColor" />
+                                </svg>
+                                ベンチマーク実行
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>実行状況</h2>
+                        </div>
+                        <div class="card-body" id="benchmark-progress">
+                            <div class="empty-state small">ベンチマークを実行してください</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:20px">
+                    <div class="card-header">
+                        <h2>単体テスト</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group flex-1">
+                                <label>SLMサービス</label>
+                                <select id="test-slm-select" class="form-input"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>テストテキスト</label>
+                            <textarea id="test-input-text" class="form-input" rows="4"
+                                placeholder="コールセンター通話テキストを入力..."></textarea>
+                        </div>
+                        <button class="btn btn-secondary" id="btn-test-masking">マスキングテスト</button>
+                        <div id="test-result" class="test-result-area" style="display:none">
+                            <div class="form-group" style="margin-top:12px">
+                                <label>マスキング結果 <span id="test-time" class="badge"></span></label>
+                                <div id="test-output" class="result-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 結果比較 -->
+            <div class="page" id="page-results">
+                <div class="page-header">
+                    <h1>結果比較</h1>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>ベンチマーク実行一覧</h2>
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table" id="results-runs-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px"><input type="checkbox" id="results-select-all"></th>
+                                    <th>名前</th>
+                                    <th>ステータス</th>
+                                    <th>実行日時</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-runs-tbody"></tbody>
+                        </table>
+                        <button class="btn btn-primary" id="btn-compare" style="margin-top:12px">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 14V6l3-1v9M7 14V3l3-2v13M12 14V8l3-1v7" stroke="currentColor"
+                                    stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            選択した結果を比較
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" id="comparison-card" style="display:none; margin-top:20px">
+                    <div class="card-header">
+                        <h2>比較結果</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="comparison-chart" class="chart-area"></div>
+                        <table class="data-table" id="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>SLM</th>
+                                    <th>タイプ</th>
+                                    <th>テスト数</th>
+                                    <th>Precision</th>
+                                    <th>Recall</th>
+                                    <th>F1スコア</th>
+                                    <th>一致率</th>
+                                    <th>平均処理時間</th>
+                                </tr>
+                            </thead>
+                            <tbody id="comparison-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:20px">
+                    <div class="card-header">
+                        <h2>リファレンス結果</h2>
+                        <button class="btn btn-sm btn-secondary" id="btn-upload-ref">リファレンスアップロード</button>
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table" id="ref-table">
+                            <thead>
+                                <tr>
+                                    <th>モデル名</th>
+                                    <th>テストデータ</th>
+                                    <th>マスキング結果（プレビュー）</th>
+                                    <th>登録日</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ref-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 詳細比較 -->
+            <div class="page" id="page-detail">
+                <div class="page-header">
+                    <h1>詳細比較</h1>
+                    <p class="page-desc">元テキスト・マスキング結果・リファレンスを並べて比較</p>
+                </div>
+
+                <!-- ベンチマーク選択 -->
+                <div class="card" style="margin-bottom:20px">
+                    <div class="card-header">
+                        <h2>比較対象の選択</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>ベンチマーク実行</label>
+                            <div id="detail-run-list" class="checkbox-list"></div>
+                        </div>
+                        <button class="btn btn-primary" id="btn-detail-compare">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <rect x="1" y="2" width="5" height="12" rx="1" stroke="currentColor"
+                                    stroke-width="1.5" />
+                                <rect x="8" y="2" width="5" height="12" rx="1" stroke="currentColor"
+                                    stroke-width="1.5" />
+                            </svg>
+                            詳細比較を実行
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 比較結果エリア -->
+                <div id="detail-results-area"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- モーダル -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">タイトル</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer" id="modal-footer"></div>
+        </div>
+    </div>
+
+    <!-- トースト通知 -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+
+</html>
